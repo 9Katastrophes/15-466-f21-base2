@@ -1,22 +1,18 @@
-# (TODO: your game's title)
+# Hungry Kitty
 
-Author: (TODO: your name)
+Author: Katherine Wang
 
-Design: (TODO: In two sentences or fewer, describe what is new and interesting about your game.)
+Design: What's interesting about my game is that instead of traditional WASD controls, you can only move forward and backwards, and in order to move sideways, you must first rotate to that direction (which also rotates the camera). I also implemented custom collision logic.
 
 Screen Shot:
 
 ![Screen Shot](screenshot.png)
 
-How Your Asset Pipeline Works:
-
-(TODO: describe the steps in your asset pipeline, from source files to tiles/backgrounds/whatever you upload to the PPU466.)
-
 How To Play:
 
-(TODO: describe the controls and (if needed) goals/strategy.)
+You are a very hungry kitty. Fortunately, there are a lot of cans of cat food nearby. Unfortunately, there are a ton of dogs around too. Use the W and S keys to move forward and back and the J and K keys to rotate the camera to navigate to the food and satiate your hunger without getting run over by an excited doggy.
 
-Sources: (TODO: list a source URL for any assets you did not create yourself. Make sure you have a license for the asset.)
+Sources: I made all my models in Blender.
 
 This game was built with [NEST](NEST.md).
 
