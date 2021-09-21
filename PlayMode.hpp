@@ -34,18 +34,25 @@ struct PlayMode : Mode {
 	std::vector<Scene::Transform *> foods;
 
 	glm::quat cat_base_rotation;
-	std::vector<glm::quat> dogs_base_rotation;
+	std::vector<glm::vec3> dogs_base_position;
 
 	//game values
 	//we need to know the radius (defined as half the length of the cube edge) in order to move properly
 	float cat_radius = 0.3f;
 	float dog_radius = 0.4f;
+	std::vector<float> dogs_circle_radius;
+	std::vector<float> dogs_circle_direction;
+	float dog_circle_degrees = 0.0f; //in radians
 	float food_radius = 0.3f;
 
 	//this value should be a poisitive integer, but we set to -1 as an invalid default value
 	int food_left = -1;
 
 	bool alive = true;
+
+	//walls
+	glm::vec2 x_bounds = glm::vec2(-8.5f, 9.5f);
+	glm::vec2 y_bounds = glm::vec2(-8.5f, 9.5f);
 	
 	//camera:
 	Scene::Camera *camera = nullptr;

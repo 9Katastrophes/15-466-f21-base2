@@ -11,6 +11,7 @@
 #include <glm/gtc/type_ptr.hpp>
 
 #include <random>
+#include <math.h>
 
 GLuint catman_meshes_for_lit_color_texture_program = 0;
 Load< MeshBuffer > catman_meshes(LoadTagDefault, []() -> MeshBuffer const * {
@@ -49,7 +50,12 @@ PlayMode::PlayMode() : scene(*catman_scene) {
 
 	cat_base_rotation = cat->rotation;
 	for (size_t i=0;i<dogs.size();i++){
-		dogs_base_rotation.push_back(dogs[i]->rotation);
+		dogs_base_position.push_back(dogs[i]->position);
+		dogs_circle_radius.push_back(i+1.0f);
+		if (i % 2 == 0)
+			dogs_circle_direction.push_back(1.0f);
+		else
+			dogs_circle_direction.push_back(-1.0f);
 	}
 	food_left = foods.size();
 
@@ -108,7 +114,6 @@ bool PlayMode::collide(Scene::Transform *obj) {
 	else if (name.substr(0, 4) == "Food"){
 		if (dist <= cat_radius + food_radius) return true;
 	}
-
 	return false;
 }
 
@@ -138,8 +143,27 @@ void PlayMode::update(float elapsed) {
 		//glm::vec3 right = frame[0];
 		glm::vec3 up = -frame[1];
 		//glm::vec3 forward = -frame[2];
-		cat->position += move.y * up;
 
+		glm::vec3 future_pos = cat->position + move.y * up;
+		if (x_bounds.x < future_pos.x && future_pos.x < x_bounds.y && y_bounds.x < future_pos.y && future_pos.y < y_bounds.y){
+			cat->position = future_pos;
+		}
+	}
+
+	//move the dogs; they like to run in circles
+	{
+		constexpr float DogCircleSpeed = 0.02f;
+		for (size_t i=0;i<dogs.size();i++) {
+			float rot = -0.1f;
+
+			glm::vec3 angles(0.0f, 0.0f, rot);
+			glm::quat delta_rotation(angles);
+			dogs[i]->rotation = glm::normalize(dogs[i]->rotation * delta_rotation);
+
+			dog_circle_degrees += DogCircleSpeed;
+			dogs[i]->position.x = dogs_circle_direction[i] * dogs_circle_radius[i] * cos(dog_circle_degrees) + dogs_base_position[i].x;
+			dogs[i]->position.y = dogs_circle_direction[i] * dogs_circle_radius[i] * sin(dog_circle_degrees) + dogs_base_position[i].y;
+		}
 
 	}
 
@@ -152,7 +176,7 @@ void PlayMode::update(float elapsed) {
 		}
 		for (size_t i=0;i<foods.size();i++){
 			if (collide(foods[i])){
-				foods[i]->position.z -= 100.0f;
+				foods[i]->position.z -= 100.0f; //essentially disappearing
 				foods.erase(foods.begin()+i);
 				food_left--;
 			}
@@ -200,12 +224,14 @@ void PlayMode::draw(glm::uvec2 const &drawable_size) {
 		));
 
 		constexpr float H = 0.09f;
-		lines.draw_text("",
-			glm::vec3(-aspect + 0.1f * H, -1.0 + 0.1f * H, 0.0),
-			glm::vec3(H, 0.0f, 0.0f), glm::vec3(0.0f, H, 0.0f),
-			glm::u8vec4(0x00, 0x00, 0x00, 0x00));
 		float ofs = 2.0f / drawable_size.y;
-		if (food_left > 0) {
+		if (!alive){
+			lines.draw_text("OW!",
+			glm::vec3(-aspect + 0.1f * H + ofs, -1.0 + + 0.1f * H + ofs, 0.0),
+			glm::vec3(H, 0.0f, 0.0f), glm::vec3(0.0f, H, 0.0f),
+			glm::u8vec4(0xff, 0xff, 0xff, 0x00));
+		}
+		else if (food_left > 0) {
 			lines.draw_text("J and K rotate the camera. W and S move you forward and backward.",
 			glm::vec3(-aspect + 0.1f * H + ofs, -1.0 + + 0.1f * H + ofs, 0.0),
 			glm::vec3(H, 0.0f, 0.0f), glm::vec3(0.0f, H, 0.0f),
